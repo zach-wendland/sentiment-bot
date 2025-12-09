@@ -2,22 +2,22 @@
 
 Aggregates and analyzes social media sentiment about financial instruments across multiple platforms: X (Twitter), Reddit, and StockTwits. Enriched with Google Trends data for market interest context.
 
-**Deployment**: Vercel (API) + Supabase (PostgreSQL + pgvector)
+**Deployment**: Railway (API) + Supabase (PostgreSQL + pgvector)
 
 ## Features
 
-- Real-time sentiment analysis using DistilBERT (fast, serverless-optimized)
+- Real-time sentiment analysis using DistilBERT
 - Multi-source data collection: X API v2, Reddit scraper, StockTwits scraper
 - Google Trends integration for market interest signals
 - Semantic embeddings with sentence-transformers for similarity search
 - PostgreSQL with pgvector for vector search
-- Vercel serverless deployment with cold start optimization
+- Container-based deployment (supports large ML models)
 
 ---
 
 ## Quick Start
 
-### Option 1: Deploy to Vercel + Supabase (Recommended)
+### Option 1: Deploy to Railway + Supabase (Recommended)
 
 **1. Set up Supabase:**
 ```bash
@@ -26,12 +26,13 @@ Aggregates and analyzes social media sentiment about financial instruments acros
 # Run the migration: infra/supabase/migrations/001_initial_schema.sql
 ```
 
-**2. Deploy to Vercel:**
+**2. Deploy to Railway:**
 ```bash
-# Connect your GitHub repo to Vercel
+# Connect your GitHub repo to Railway at https://railway.app
 # Set environment variables:
 #   X_BEARER_TOKEN=your_twitter_bearer_token
 #   DATABASE_URL=your_supabase_connection_string
+#   PORT=8000
 ```
 
 ### Option 2: Local Development
@@ -126,8 +127,6 @@ curl "http://localhost:8000/query?symbol=AAPL&window=24h"
 
 ```
 sentiment-bot/
-├── api/
-│   └── index.py                  # Vercel serverless entry point
 ├── app/
 │   ├── main.py                   # FastAPI application
 │   ├── config.py                 # Settings management
@@ -155,7 +154,7 @@ sentiment-bot/
 │   └── supabase/
 │       └── migrations/           # Supabase schema migrations
 ├── tests/                        # Unit & integration tests
-├── vercel.json                   # Vercel deployment config
+├── Procfile                      # Railway deployment config
 └── requirements.txt
 ```
 
@@ -194,7 +193,7 @@ Aggregate Results → JSON Response
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| **Deployment** | Vercel | Serverless API hosting |
+| **Deployment** | Railway | Container-based API hosting |
 | **Database** | Supabase (PostgreSQL + pgvector) | Data storage + vector search |
 | **Web Framework** | FastAPI 0.109.0 | REST API, auto-docs |
 | **Sentiment** | DistilBERT (SST-2) | Fast sentiment classification |
@@ -207,7 +206,7 @@ Aggregate Results → JSON Response
 ## ML Models
 
 - **DistilBERT** (distilbert-base-uncased-finetuned-sst-2-english):
-  - Optimized for serverless (~5s cold start, ~250MB)
+  - Optimized for speed (~5s model load)
   - Classes: negative, positive (neutral via confidence threshold)
   - Output: Polarity (-1 to +1), Confidence
 
@@ -224,6 +223,7 @@ Environment variables (`.env`):
 |----------|----------|-------------|
 | `X_BEARER_TOKEN` | For X data | Twitter API v2 bearer token |
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `PORT` | Yes (Railway) | Port to listen on (Railway sets this) |
 | `REDDIT_RATE_LIMIT` | No | Requests per second (default: 0.5) |
 | `STOCKTWITS_RATE_LIMIT` | No | Requests per second (default: 0.33) |
 | `GOOGLE_TRENDS_ENABLED` | No | Enable trends enrichment (default: true) |
@@ -282,18 +282,21 @@ If scraping fails, check logs and update selectors/endpoints as needed.
 
 ## Deployment
 
-### Vercel
+### Railway
 
-1. Connect GitHub repo to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy
+1. Connect GitHub repo to Railway at https://railway.app
+2. Set environment variables in Railway dashboard:
+   - `X_BEARER_TOKEN`
+   - `DATABASE_URL` (Supabase connection string)
+   - `PORT` (Railway sets automatically)
+3. Deploy - Railway auto-detects Python and uses Procfile
 
 ### Supabase
 
 1. Create project at supabase.com
 2. Enable pgvector: `CREATE EXTENSION IF NOT EXISTS vector;`
 3. Run migration from `infra/supabase/migrations/`
-4. Copy connection string (use pooler URL for serverless)
+4. Copy connection string (use pooler URL for production)
 
 ## Troubleshooting
 

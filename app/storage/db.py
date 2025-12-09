@@ -21,7 +21,7 @@ def _get_connection() -> psycopg.Connection:
     Get database connection with retry logic and caching for serverless.
 
     Supabase uses Supavisor for connection pooling. We cache the connection
-    at module level to reuse across warm invocations on Vercel.
+    at module level to reuse across warm invocations.
     """
     global _connection_cache
 

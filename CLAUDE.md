@@ -29,7 +29,7 @@ python validate_e2e.py
 
 ## Architecture Overview
 
-This is a FastAPI-based sentiment analysis service for financial instruments, deployed on Vercel with Supabase (PostgreSQL + pgvector).
+This is a FastAPI-based sentiment analysis service for financial instruments, deployed on Railway with Supabase (PostgreSQL + pgvector).
 
 **Data Flow:**
 ```
@@ -38,7 +38,6 @@ Query → Symbol Resolution → Multi-Source Collection (parallel) → NLP Pipel
 
 ### Key Components
 
-- **`api/index.py`**: Vercel serverless entry point
 - **`app/main.py`**: FastAPI app with `/query`, `/healthz`, and `/` endpoints
 - **`app/orchestration/tasks.py`**: Main pipeline orchestrator (`aggregate_social`) - coordinates symbol resolution, parallel post collection, cleaning, sentiment scoring, embedding generation, Google Trends enrichment, and result aggregation
 - **`app/services/resolver.py`**: Maps company names/tickers to standardized symbols (cached in PostgreSQL)
@@ -68,7 +67,7 @@ Query → Symbol Resolution → Multi-Source Collection (parallel) → NLP Pipel
 
 ### Infrastructure
 
-- **Vercel**: Serverless API hosting (configured in `vercel.json`)
+- **Railway**: Container-based API hosting (Procfile)
 - **Supabase**: PostgreSQL 16 with pgvector extension
 - **Local**: Docker Compose for PostgreSQL (in `infra/docker-compose.yaml`)
 
@@ -76,7 +75,8 @@ Query → Symbol Resolution → Multi-Source Collection (parallel) → NLP Pipel
 
 All settings via environment variables (see `.env.example`):
 - `X_BEARER_TOKEN`: X/Twitter API v2 bearer token
-- `DATABASE_URL`: PostgreSQL connection string (Supabase pooler URL for serverless)
+- `DATABASE_URL`: PostgreSQL connection string (Supabase pooler URL for production)
+- `PORT`: Port to listen on (Railway sets this automatically)
 - `REDDIT_RATE_LIMIT`: Requests per second (default: 0.5)
 - `STOCKTWITS_RATE_LIMIT`: Requests per second (default: 0.33)
 - `GOOGLE_TRENDS_ENABLED`: Enable trends enrichment (default: true)
@@ -92,7 +92,7 @@ All settings via environment variables (see `.env.example`):
 - User-agent rotation for web scraping
 - Fallback strategies: DistilBERT → heuristics, sentence-transformers → hash-based embeddings
 - Graceful degradation: individual source failures don't block other sources
-- Connection pooling for Supabase serverless environments
+- Connection pooling for Supabase environments
 
 ## Testing
 
