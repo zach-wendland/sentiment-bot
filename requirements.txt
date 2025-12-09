@@ -15,9 +15,9 @@ numpy==1.26.3
 python-dotenv==1.0.0
 
 # NLP / ML
-transformers==4.36.2
-torch==2.1.2
-sentence-transformers==2.2.2
+transformers>=4.36.2
+torch>=2.2.0
+sentence-transformers>=2.2.2
 
 # Scrapers
 beautifulsoup4==4.12.3
